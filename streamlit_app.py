@@ -3,19 +3,14 @@ import pandas as pd
 import yfinance as yf
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-import plotly.express as px
-
+import streamlit as st
 basedailydata = yf.download(tickers = 'EURUSD=X' ,period ='1d', interval = '1d')
 #print(basedailydata)
 maindate=basedailydata.first('1d')
 
-#print(maindate)
-
-#print(maindate)
-
 fig = go.Figure()
 fig = make_subplots(rows = 1,cols = 1)
-
+fig.update_layout(title_text="title", margin={"r": 0, "t": 0, "l": 0, "b": 0}, height=1100)
 asset=pd.DataFrame({'pair':['EURUSD=X','GBPUSD=X','JPYUSD=X','AUDUSD=X','CADUSD=X','CHFUSD=X','NZDUSD=X' ],
        'pipvalue':[0.0001,0.0001,0.000001,0.0001,0.0001,0.0001,0.0001],
         'incolor':['lime','green','aqua','magenta','yellow','turquoise','coral'] ,          
@@ -53,5 +48,8 @@ for index, row in asset.iterrows():
     })
     stats = pd.concat([stats, temp])
 
-print(stats)   
-fig.show()
+st.set_page_config(layout="wide")     
+col1, col2 = st.columns([2, 0.8])
+stats=stats.sort_values(by='current_price',key=abs,ascending=False)
+col2.table(stats)
+col1.plotly_chart(fig,use_container_width=True)
