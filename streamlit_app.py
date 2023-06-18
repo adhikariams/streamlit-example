@@ -1,38 +1,57 @@
-from collections import namedtuple
-import altair as alt
-import math
+import numpy as np
 import pandas as pd
-import streamlit as st
+import yfinance as yf
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
+import plotly.express as px
 
-"""
-# Welcome to Streamlit!
+basedailydata = yf.download(tickers = 'EURUSD=X' ,period ='1d', interval = '1d')
+#print(basedailydata)
+maindate=basedailydata.first('1d')
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+#print(maindate)
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+#print(maindate)
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+fig = go.Figure()
+fig = make_subplots(rows = 1,cols = 1)
 
+asset=pd.DataFrame({'pair':['EURUSD=X','GBPUSD=X','JPYUSD=X','AUDUSD=X','CADUSD=X','CHFUSD=X','NZDUSD=X' ],
+       'pipvalue':[0.0001,0.0001,0.000001,0.0001,0.0001,0.0001,0.0001],
+        'incolor':['lime','green','aqua','magenta','yellow','turquoise','coral'] ,          
+        'dwcolor':['red','orange','dimgrey','blue','purple','indigo','black']})
+asset = asset.reset_index()
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
+df = pd.DataFrame({'c1': [10, 11, 12], 'c2': [100, 110, 120]})
+df = df.reset_index()
 
-    Point = namedtuple('Point', 'x y')
-    data = []
+stats=pd.DataFrame()
 
-    points_per_turn = total_points / num_turns
+for index, row in asset.iterrows():
+    a=row['pair']
+    b=row['pipvalue']
+    
+    dailydata = yf.download(tickers = a ,period ='1d', interval = '5m')
+    ailydata =dailydata[dailydata.index.date==maindate.index.date]
+    ddata=dailydata[dailydata.index.hour+dailydata.index.minute==0]
+    dailydata["cOpen"]=dailydata.apply(lambda x: x["Open"]/b-ddata["Open"]/b, axis=1)
+    dailydata["cHigh"]=dailydata.apply(lambda x: x["High"]/b-ddata["Open"]/b, axis=1)
+    dailydata["cLow"]=dailydata.apply(lambda x: x["Low"]/b-ddata["Open"]/b, axis=1)
+    dailydata["cClose"]=dailydata.apply(lambda x: x["Close"]/b-ddata["Open"]/b, axis=1)
+    fig.add_trace(go.Candlestick(x=dailydata.index,
+        open=dailydata['cOpen'],
+        high=dailydata['cHigh'],
+        low=dailydata['cLow'],
+        close=dailydata['cClose'], name = a,increasing_line_color= row['incolor'], decreasing_line_color= row['dwcolor']))  
+    #print(dailydata['cHigh'].max())
+    temp = pd.DataFrame({'pair':[a],
+                         'day_high':[round(dailydata['cHigh'].max())] ,
+                         'day_low':[round(dailydata['cLow'].min())],
+                         'day_range':[round(dailydata['cHigh'].max()-dailydata['cLow'].min())],
+                         'current_time':pd.to_datetime(dailydata.index[-1]),#dailydata.index[-1].year,dailydata.index[-1].day,dailydata.index[-1].day,
+                         'current_price':dailydata[dailydata.index==dailydata.index[-1]]['cClose'].values.round(0)
+    })
+    stats = pd.concat([stats, temp])
 
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
-
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+print(stats)   
+fig.show()
