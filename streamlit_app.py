@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -48,8 +49,11 @@ for index, row in asset.iterrows():
     })
     stats = pd.concat([stats, temp])
 
-st.set_page_config(layout="wide")     
-col1, col2 = st.columns([2, 0.8])
-stats=stats.sort_values(by='current_price',key=abs,ascending=False)
-col2.table(stats)
-col1.plotly_chart(fig,use_container_width=True)
+st.set_page_config(layout="wide")
+placeholder = st.empty()
+with placeholder.container():     
+    col1, col2 = st.columns([2, 0.8])
+    stats=stats.sort_values(by='current_price',key=abs,ascending=False)
+    col2.table(stats)
+    col1.plotly_chart(fig,use_container_width=True)
+    time.sleep(60)
