@@ -47,11 +47,11 @@ for index, row in asset.iterrows():
                          'day_low':[round(dailydata['cLow'].min())],
                          'day_range':[round(dailydata['cHigh'].max()-dailydata['cLow'].min())],
                          'current_time':pd.to_datetime(dailydata.index[-1]),#dailydata.index[-1].year,dailydata.index[-1].day,dailydata.index[-1].day,
-                         'current_p':dailydata[dailydata.index==dailydata.index[-1]]['cClose'].values.round(0)
+                         'current_price':dailydata[dailydata.index==dailydata.index[-1]]['cClose'].values.round(0)
     })
     stats = pd.concat([stats, temp])
 
-stats=stats.sort_values(by='current_p',key=abs,ascending=False)
+stats=stats.sort_values(by='current_price',key=abs,ascending=False)
 stats.index=stats['pair']
 ytime=stats['current_time'].max()
 localFormat = "%Y-%m-%d %H:%M %p"
