@@ -54,7 +54,7 @@ for index, row in asset.iterrows():
 stats=stats.sort_values(by='current_price',key=abs,ascending=False)
 stats.index=stats['pair'].str[:3]
 ytime=stats['current_time'].max()
-ytime -= datetime.timedelta(hours=1)
+#ytime -= datetime.timedelta(hours=1)
 localFormat = "%Y-%m-%d %H:%M %p"
 timezone = 'Australia/Melbourne'
 localDatetime = datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone(timezone))
