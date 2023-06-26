@@ -58,7 +58,7 @@ ytime=stats['current_time'].max()
 localFormat = "%Y-%m-%d %H:%M %p"
 timezone = 'Australia/Melbourne'
 localDatetime = datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone(timezone))
-yhtime=ytime.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(timezone))
+yhtime=ytime.replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Atlantic/cape_Verde')).replace(tzinfo=pytz.utc).astimezone(pytz.timezone(timezone))
 # delete repeats of asset and time columns
 stats=stats.drop('pair', axis=1).drop('current_time', axis=1)
 
